@@ -1,0 +1,304 @@
+
+MariaDB [test]> create database BanklyDB;
+Query OK, 1 row affected (0.003 sec)
+
+MariaDB [test]>
+MariaDB [test]> USE BanklyDB;
+Database changed
+MariaDB [BanklyDB]> show databases
+    -> ;
++--------------------+
+| Database           |
++--------------------+
+| banklydb           |
+| information_schema |
+| mysql              |
+| performance_schema |
+| phpmyadmin         |
+| test               |
++--------------------+
+6 rows in set (0.001 sec)
+
+MariaDB [BanklyDB]> use banklydb;
+Database changed
+
+MariaDB [banklydb]> CREATE TABLE customers (
+    ->     customer_id INT PRIMARY KEY,
+    ->     full_name VARCHAR(100),
+    ->     email VARCHAR(100),
+    ->     phone VARCHAR(20),
+    ->     registration_date DATE
+    -> );
+Query OK, 0 rows affected (0.068 sec)
+
+MariaDB [banklydb]> create table advisors(
+    -> advisor_id int PRIMARY KEY,
+    -> full_name VARCHAR(100),
+    -> email VARCHAR(100));
+Query OK, 0 rows affected (0.065 sec)
+
+MariaDB [banklydb]> CREATE TABLE accounts (
+    ->     account_id INT PRIMARY KEY AUTO_INCREMENT,
+    ->     account_number VARCHAR(20) NOT NULL,
+    ->     balance DECIMAL(15,2) DEFAULT 0,
+    ->     account_type ENUM('Checking', 'Savings', 'Business') NOT NULL,
+    ->     customer_id INT,
+    ->     advisor_id INT,
+    ->     FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE,
+    ->     FOREIGN KEY (advisor_id) REFERENCES advisors(advisor_id) ON DELETE SET NULL
+    -> );
+Query OK, 0 rows affected (0.021 sec)
+
+MariaDB [banklydb]> CREATE TABLE transactions (
+    ->     transaction_id INT PRIMARY KEY AUTO_INCREMENT,
+    ->     amount DECIMAL(15,2) NOT NULL,
+    ->     transaction_type ENUM('debit','credit') NOT NULL,
+    ->     transaction_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    ->     account_id INT,
+    ->     FOREIGN KEY (account_id) REFERENCES accounts(account_id) ON DELETE CASCADE
+    -> );
+Query OK, 0 rows affected (0.038 sec)
+
+MariaDB [banklydb]> ALTER TABLE customers
+    -> MODIFY customer_id INT NOT NULL AUTO_INCREMENT;
+Query OK, 0 rows affected (0.068 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [banklydb]> INSERT INTO customers (full_name, email, phone, registration_date) VALUES
+    -> ('Ali', 'ali@example.com', '0600000001', '2025-12-01'),
+    -> ('Sara', 'sara@example.com', '0600000002', '2025-12-01');
+Query OK, 2 rows affected (0.027 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+MariaDB [banklydb]> SELECT * FROM customers;
++-------------+-----------+------------------+------------+-------------------+
+| customer_id | full_name | email            | phone      | registration_date |
++-------------+-----------+------------------+------------+-------------------+
+|           1 | Ali       | ali@example.com  | 0600000001 | 2025-12-01        |
+|           2 | Sara      | sara@example.com | 0600000002 | 2025-12-01        |
++-------------+-----------+------------------+------------+-------------------+
+2 rows in set (0.001 sec)
+
+MariaDB [banklydb]> alter table advisors
+    -> modify advisor_id int not null auto_increment;
+Query OK, 0 rows affected (0.079 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [banklydb]> insert into advisors (full_name,email) values
+    -> ('ELfarh','farhmohamed@gmail.com'),
+    -> ('jawad','jawadajarti@gmail.com');
+Query OK, 2 rows affected (0.029 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+MariaDB [banklydb]> insert into accounts(account_number,balance,account_type,customer_id, advisor_id) values
+    -> ('ACC001', 5000, 'Checking', 1, 1),
+    -> ('ACC002', 12000, 'Savings', 2, 2);
+Query OK, 2 rows affected (0.028 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+MariaDB [banklydb]> INSERT INTO transactions (amount, transaction_type, account_id) VALUES
+    -> (500, 'credit', 1),
+    -> (200, 'debit', 1),
+    -> (1000, 'credit', 2);
+Query OK, 3 rows affected (0.030 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+MariaDB [banklydb]> update customers
+    -> set phone = 0624439929
+    -> where customer_id=1;
+Query OK, 1 row affected (0.047 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+MariaDB [banklydb]> SELECT * FROM Customers;
++-------------+-----------+------------------+------------+-------------------+
+| customer_id | full_name | email            | phone      | registration_date |
++-------------+-----------+------------------+------------+-------------------+
+|           1 | Ali       | ali@example.com  | 624439929  | 2025-12-01        |
+|           2 | Sara      | sara@example.com | 0600000002 | 2025-12-01        |
++-------------+-----------+------------------+------------+-------------------+
+2 rows in set (0.003 sec)
+
+MariaDB [banklydb]> update customers
+    -> set phone =  '0624439929'
+    -> where customer_id = 1;
+Query OK, 1 row affected (0.045 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+MariaDB [banklydb]> select * from customers;
++-------------+-----------+------------------+------------+-------------------+
+| customer_id | full_name | email            | phone      | registration_date |
++-------------+-----------+------------------+------------+-------------------+
+|           1 | Ali       | ali@example.com  | 0624439929 | 2025-12-01        |
+|           2 | Sara      | sara@example.com | 0600000002 | 2025-12-01        |
++-------------+-----------+------------------+------------+-------------------+
+2 rows in set (0.001 sec)
+
+MariaDB [banklydb]> select full_name , email from customers;
++-----------+------------------+
+| full_name | email            |
++-----------+------------------+
+| Ali       | ali@example.com  |
+| Sara      | sara@example.com |
++-----------+------------------+
+2 rows in set (0.001 sec)
+
+MariaDB [banklydb]> select * from accounts;
++------------+----------------+----------+--------------+-------------+------------+
+| account_id | account_number | balance  | account_type | customer_id | advisor_id |
++------------+----------------+----------+--------------+-------------+------------+
+|          1 | ACC001         |  5000.00 | Checking     |           1 |          1 |
+|          2 | ACC002         | 12000.00 | Savings      |           2 |          2 |
++------------+----------------+----------+--------------+-------------+------------+
+2 rows in set (0.001 sec)
+
+MariaDB [banklydb]> select account_number from accounts;
++----------------+
+| account_number |
++----------------+
+| ACC001         |
+| ACC002         |
++----------------+
+2 rows in set (0.001 sec)
+
+MariaDB [banklydb]> select * from transactions;
++----------------+---------+------------------+---------------------+------------+
+| transaction_id | amount  | transaction_type | transaction_date    | account_id |
++----------------+---------+------------------+---------------------+------------+
+|              1 |  500.00 | credit           | 2025-12-01 12:05:42 |          1 |
+|              2 |  200.00 | debit            | 2025-12-01 12:05:42 |          1 |
+|              3 | 1000.00 | credit           | 2025-12-01 12:05:42 |          2 |
++----------------+---------+------------------+---------------------+------------+
+3 rows in set (0.001 sec)
+
+MariaDB [banklydb]> select * from accounts where balance>1000;
++------------+----------------+----------+--------------+-------------+------------+
+| account_id | account_number | balance  | account_type | customer_id | advisor_id |
++------------+----------------+----------+--------------+-------------+------------+
+|          1 | ACC001         |  5000.00 | Checking     |           1 |          1 |
+|          2 | ACC002         | 12000.00 | Savings      |           2 |          2 |
++------------+----------------+----------+--------------+-------------+------------+
+2 rows in set (0.001 sec)
+
+MariaDB [banklydb]>  select * from accounts where balance>10000;
++------------+----------------+----------+--------------+-------------+------------+
+| account_id | account_number | balance  | account_type | customer_id | advisor_id |
++------------+----------------+----------+--------------+-------------+------------+
+|          2 | ACC002         | 12000.00 | Savings      |           2 |          2 |
++------------+----------------+----------+--------------+-------------+------------+
+1 row in set (0.001 sec)
+
+MariaDB [banklydb]>  select * from accounts where balance<=0;
+Empty set (0.001 sec)
+
+MariaDB [banklydb]> select * from transactions where transaction_type = "debit";
++----------------+--------+------------------+---------------------+------------+
+| transaction_id | amount | transaction_type | transaction_date    | account_id |
++----------------+--------+------------------+---------------------+------------+
+|              2 | 200.00 | debit            | 2025-12-01 12:05:42 |          1 |
++----------------+--------+------------------+---------------------+------------+
+1 row in set (0.001 sec)
+
+MariaDB [banklydb]> select * from transactions where transaction_type = "credit";
++----------------+---------+------------------+---------------------+------------+
+| transaction_id | amount  | transaction_type | transaction_date    | account_id |
++----------------+---------+------------------+---------------------+------------+
+|              1 |  500.00 | credit           | 2025-12-01 12:05:42 |          1 |
+|              3 | 1000.00 | credit           | 2025-12-01 12:05:42 |          2 |
++----------------+---------+------------------+---------------------+------------+
+2 rows in set (0.001 sec)
+
+MariaDB [banklydb]> select * from transactions where transaction_id = 1;
++----------------+--------+------------------+---------------------+------------+
+| transaction_id | amount | transaction_type | transaction_date    | account_id |
++----------------+--------+------------------+---------------------+------------+
+|              1 | 500.00 | credit           | 2025-12-01 12:05:42 |          1 |
++----------------+--------+------------------+---------------------+------------+
+1 row in set (0.001 sec)
+
+MariaDB [banklydb]> SELECT DISTINCT c.*
+    -> FROM customers c
+    -> JOIN accounts a ON c.customer_id = a.customer_id
+    -> WHERE a.advisor_id = 2;
++-------------+-----------+------------------+------------+-------------------+
+| customer_id | full_name | email            | phone      | registration_date |
++-------------+-----------+------------------+------------+-------------------+
+|           2 | Sara      | sara@example.com | 0600000002 | 2025-12-01        |
++-------------+-----------+------------------+------------+-------------------+
+1 row in set (0.001 sec)
+
+MariaDB [banklydb]> select * from accounts where account_type="Savings";
++------------+----------------+----------+--------------+-------------+------------+
+| account_id | account_number | balance  | account_type | customer_id | advisor_id |
++------------+----------------+----------+--------------+-------------+------------+
+|          2 | ACC002         | 12000.00 | Savings      |           2 |          2 |
++------------+----------------+----------+--------------+-------------+------------+
+1 row in set (0.001 sec)
+
+MariaDB [banklydb]> select * from transactions where amount >=500;
++----------------+---------+------------------+---------------------+------------+
+| transaction_id | amount  | transaction_type | transaction_date    | account_id |
++----------------+---------+------------------+---------------------+------------+
+|              1 |  500.00 | credit           | 2025-12-01 12:05:42 |          1 |
+|              3 | 1000.00 | credit           | 2025-12-01 12:05:42 |          2 |
++----------------+---------+------------------+---------------------+------------+
+2 rows in set (0.001 sec)
+
+MariaDB [banklydb]> select * from transactions where 1000>amount >=100;
+Empty set (0.001 sec)
+
+MariaDB [banklydb]> SELECT * FROM transactions WHERE amount BETWEEN 100 AND 1000;
++----------------+---------+------------------+---------------------+------------+
+| transaction_id | amount  | transaction_type | transaction_date    | account_id |
++----------------+---------+------------------+---------------------+------------+
+|              1 |  500.00 | credit           | 2025-12-01 12:05:42 |          1 |
+|              2 |  200.00 | debit            | 2025-12-01 12:05:42 |          1 |
+|              3 | 1000.00 | credit           | 2025-12-01 12:05:42 |          2 |
++----------------+---------+------------------+---------------------+------------+
+3 rows in set (0.001 sec)
+
+MariaDB [banklydb]> SELECT * FROM accounts WHERE customer_id = 1;
++------------+----------------+---------+--------------+-------------+------------+
+| account_id | account_number | balance | account_type | customer_id | advisor_id |
++------------+----------------+---------+--------------+-------------+------------+
+|          1 | ACC001         | 5000.00 | Checking     |           1 |          1 |
++------------+----------------+---------+--------------+-------------+------------+
+1 row in set (0.001 sec)
+
+MariaDB [banklydb]> SELECT * FROM accounts ORDER BY balance ASC;
++------------+----------------+----------+--------------+-------------+------------+
+| account_id | account_number | balance  | account_type | customer_id | advisor_id |
++------------+----------------+----------+--------------+-------------+------------+
+|          1 | ACC001         |  5000.00 | Checking     |           1 |          1 |
+|          2 | ACC002         | 12000.00 | Savings      |           2 |          2 |
++------------+----------------+----------+--------------+-------------+------------+
+2 rows in set (0.001 sec)
+
+MariaDB [banklydb]> SELECT * FROM transactions ORDER BY amount DESC;
++----------------+---------+------------------+---------------------+------------+
+| transaction_id | amount  | transaction_type | transaction_date    | account_id |
++----------------+---------+------------------+---------------------+------------+
+|              3 | 1000.00 | credit           | 2025-12-01 12:05:42 |          2 |
+|              1 |  500.00 | credit           | 2025-12-01 12:05:42 |          1 |
+|              2 |  200.00 | debit            | 2025-12-01 12:05:42 |          1 |
++----------------+---------+------------------+---------------------+------------+
+3 rows in set (0.001 sec)
+
+MariaDB [banklydb]> SELECT * FROM transactions ORDER BY amount DESC LIMIT 5;
++----------------+---------+------------------+---------------------+------------+
+| transaction_id | amount  | transaction_type | transaction_date    | account_id |
++----------------+---------+------------------+---------------------+------------+
+|              3 | 1000.00 | credit           | 2025-12-01 12:05:42 |          2 |
+|              1 |  500.00 | credit           | 2025-12-01 12:05:42 |          1 |
+|              2 |  200.00 | debit            | 2025-12-01 12:05:42 |          1 |
++----------------+---------+------------------+---------------------+------------+
+3 rows in set (0.001 sec)
+
+MariaDB [banklydb]>  SELECT * FROM transactions ORDER BY transaction_date DESC;
++----------------+---------+------------------+---------------------+------------+
+| transaction_id | amount  | transaction_type | transaction_date    | account_id |
++----------------+---------+------------------+---------------------+------------+
+|              1 |  500.00 | credit           | 2025-12-01 12:05:42 |          1 |
+|              2 |  200.00 | debit            | 2025-12-01 12:05:42 |          1 |
+|              3 | 1000.00 | credit           | 2025-12-01 12:05:42 |          2 |
++----------------+---------+------------------+---------------------+------------+
+3 rows in set (0.001 sec)
